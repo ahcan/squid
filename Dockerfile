@@ -8,9 +8,13 @@ RUN apt-get upgrade -y
 RUN apt-get install apt-utils -y
 RUN apt-get install tzdata -y
 RUN apt-get install -y squid
+COPY docker-entrypoint.sh /
 ENV TZ=Asia/Ho_Chi_Minh
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-RUN rm /etc/squid/squid.conf
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &&\
+	mkdir -p /var/cache/squid &&\ 
+	chmod +x /docker-entrypoint.sh
 COPY squid.conf /etc/squid/squid.conf
-ENTRYPOINT service squid start && /bin/bash
+#ENTRYPOINT [ "/docker-entrypoint.sh" ]
+ENTRYPOINT /etc/init.d/squid restart && /bin/bash
+CMD [ "squid" ]
 EXPOSE 3128/tcp
